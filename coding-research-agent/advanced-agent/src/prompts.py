@@ -1,9 +1,9 @@
 class DeveloperToolsPrompts:
     """Collection of prompts for analyzing developer tools and technologies"""
 
-    # -----------------------
-    # Tool extraction prompts
-    # -----------------------
+    # ------------------------------------------------------
+    # Tool extraction prompts (What Are the Tools available)
+    # ------------------------------------------------------
     TOOL_EXTRACTION_SYSTEM = """
                             You are a technology researcher.
                             Extract specific tools, librarys, platforms, or service names from articles.
@@ -20,7 +20,7 @@ class DeveloperToolsPrompts:
 
                 Rules:
                 - Only include actual product names, not generic terms
-                - Focus on tools developers can direcxtly use/implement
+                - Focus on tools developers can directly use/implement
                 - Include both open source and commercial options
                 - Limit to the 5 most relevant tools
                 - Return just the tool names, one per line, no descriptions
@@ -32,9 +32,9 @@ class DeveloperToolsPrompts:
                 Appwrite
                 Nhost"""
 
-    # -----------------------------
-    # Company/Tool analysis prompts
-    # -----------------------------
+    # -----------------------------------------------------------
+    # Company/Tool analysis prompts (Describe the Tool in detail)
+    # -----------------------------------------------------------
     TOOL_ANALYSIS_SYSTEM = """
                         You are analyzing developer tools and programming technologies
                         Focus on extracting information relevant to programmers and software developers.
@@ -58,9 +58,9 @@ class DeveloperToolsPrompts:
                 Focus on developer-relevant features like APIs, SDKs, language support, integrations, and developer workflows.
                 """
 
-    # ----------------------
-    # Recommendation prompts
-    # ----------------------
+    # -------------------------------------------------------------------------------
+    # Recommendation prompts (Give quick recommendation about Tools and technologies)
+    # -------------------------------------------------------------------------------
     RECOMMENDATION_SYSTEM = """
                             You are a senior software engineer providing quick, concise tech recommendations. Keep responses brief and actionable - maximum 3-4 sentences total.
                             """
