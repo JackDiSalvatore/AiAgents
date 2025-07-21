@@ -1,5 +1,7 @@
 import os
+from typing import Any
 from firecrawl import FirecrawlApp, ScrapeOptions
+from firecrawl import SearchResponse, ScrapeResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,8 +17,7 @@ class FireCrawlService:
         self.app = FirecrawlApp(api_key)
 
     # Searching Web (like Google search)
-    def search_companies(self, query: str, num_results: int = 5):
-        
+    def search_companies(self, query: str, num_results: int = 5) -> SearchResponse:
         try:
             result = self.app.search(
                 query=f"{query} company pricing",
@@ -29,10 +30,10 @@ class FireCrawlService:
             return result
         except Exception as e:
             print(e)
-            return []
+            return SearchResponse(data=[])
 
     # Search within a Website (scape)
-    def scrape_company_pages(self, url: str):
+    def scrape_company_page(self, url: str) -> ScrapeResponse[Any]:
         try:
             result = self.app.scrape_url(
                 url,
@@ -42,7 +43,7 @@ class FireCrawlService:
             return result
         except Exception as e:
             print(e)
-            return None
+            return ScrapeResponse(data=None)
 
     # Other functions could include:
     # - map

@@ -32,7 +32,7 @@ class Workflow:
 
         for result in search_results.data:
             url = result.get("url", "")
-            scraped = self.firecrawl.scrape_company_pages(url)
+            scraped = self.firecrawl.scrape_company_page(url)
 
             if scraped:
                 all_content + scraped.markdown[:1500] + "\n\n"
@@ -60,3 +60,77 @@ class Workflow:
             except Exception as e:
                 print(e)
                 return {"extracted_tools": []}
+
+    def _research_step(self, state: ResearchState) -> Dict[str, Any]:
+
+        def _analyze_company_content(name: str, content):
+            structured_llm = self.llm.with_structured_output(CompanyAnalysis)
+
+            message = [
+                SystemMessage(content=self.prompts.TOOL_ANALYSIS_SYSTEM),
+                HumanMessage(content=self.prompts.tool_analysis_user(company_name, content))
+            ]
+
+            try:
+                analysis = structured_llm.invoke(message)
+                return analysis
+            except Exception as e:
+                print(e)
+                return CompanyAnalysis(
+                    princing_model="Unknown",
+                    is_open_source=None,
+                    tech_stack=[],
+                    description="Failed",
+                    api_available=None,
+                    language_support=[],
+                    integration_capabilities=[]
+                )
+
+
+        extracted_tools = getattr(state, "extracted_tools", [])
+
+        if not extracted_tools:
+            print("No extracted tools found, falling back to direct search")
+
+            # Search again for 1 more result
+            search_results = self.firecrawl.search_companies(state.query, num_results=4)
+
+            # Replace the tool names with the title of the websites metadata as a fallback
+            tools_names = []
+
+            for result in search_results.data:
+                result.get("metadata", {}).get("title", "Unknown")
+
+                if result:
+                    tool_names.append(result)
+        else:
+            tool_names = extracted_tools[:4]
+
+        print(f"Researching specific tools: {','.join(tool_names)}")
+
+        companies = []
+
+        for tool_name in tool_names:
+            # Look up official site
+            tool_search_results = self.firecrawl.search_compaines(tool_name + " official site", num_results=1)
+
+            if tool_search_results:
+                # Get website url
+                result = tool_search_results.data[0]
+                url = result.get("url", "")
+
+                company = CompanyInfo(
+                    name=tool_name,
+                    description=result.get("markdown", ""),
+                    website=url,
+                    tech_stack=[],
+                    competitors=[]
+                )
+
+                # Scrape web page for content
+                scraped = self.firecrawl.scrape_company_page(url)
+
+                if scraped:
+                    content = scraped.markdown
+                    analysis = _analyze_company_content(company.name, content)
+        
