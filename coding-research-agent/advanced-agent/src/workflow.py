@@ -73,6 +73,9 @@ class Workflow:
                 print(e)
                 return {"extracted_tools": []}
 
+        # If the for loop does not execute, return an empty list
+        return {"extracted_tools": []}
+
     def _research_step(self, state: ResearchState) -> Dict[str, Any]:
 
         def _analyze_company_content(name: str, content):
@@ -118,7 +121,7 @@ class Workflow:
         else:
             tool_names = extracted_tools[:4]
 
-        print(f"Researching specific tools: {','.join(tool_names)}")
+        print(f"Researching specific tools: {', '.join(tool_names)}")
 
         companies = []
 
@@ -157,7 +160,7 @@ class Workflow:
 
                 companies.append(company)
 
-            return {"companies": companies}
+        return {"companies": companies}
 
 
     def _analyze_step(self, state: ResearchState) -> Dict[str, Any]:
