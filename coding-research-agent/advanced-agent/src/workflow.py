@@ -17,7 +17,19 @@ class Workflow:
         self.workflow = self._build_workflow()
 
     def _build_workflow(self):
-        pass
+        graph = StateGraph(ResearchState)
+
+        graph.add_node("extract_tools", self._extract_tool_step)
+        graph.add_node("research", self._research_step)
+        graph.add_node("analyze", self._analyze_step)
+
+        graph.set_entry_point("extract_tools")
+
+        graph.add_edge("extract_tools", "research")
+        graph.add_edge("research", "analyze")
+        graph.add_edge("analyze", END)
+
+        return graph.compile()
 
     def _extract_tool_step(self, state: ResearchState) -> Dict[str, Any]:
         print(f"Finding articles about: {state.query}")
@@ -148,4 +160,11 @@ class Workflow:
         ]
 
         response = self.llm.invoke(messages)
+
         return { "analysis": response.content }
+
+    def run(self, query: str) -> ResearchState:
+        initial_state = ResearchState(query=query)
+        final_state = self.workflow.invoke(initial_state)
+
+        return ResearchState(**final_state)
