@@ -46,11 +46,12 @@ class Workflow:
             try:
                 response = self.llm.invoke(messages)
 
-                tool_names = [
-                    name.strip()
-                    for name in response.content.strip().split("\n")
-                    if name.strip()
-                ]
+                tool_names = []
+
+                for line in response.content.strip().split("\n"):
+                    name = line.strip()
+                    if name:
+                        tool_names.append(name)
 
                 print(f"Extracted tools: {','.join(tool_names[:5])}")
 
