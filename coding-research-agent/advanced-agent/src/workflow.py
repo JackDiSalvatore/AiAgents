@@ -133,4 +133,19 @@ class Workflow:
                 if scraped:
                     content = scraped.markdown
                     analysis = _analyze_company_content(company.name, content)
-        
+
+
+    def _analyze_step(self, state: ResearchState) -> Dict[str, Any]:
+        print("Generating recommendations")
+
+        company_data = ",".join([
+            company.json() for company in state.compnaies
+        ])
+
+        messages = [
+            SystemMessage(content=self.prompts.RECOMMENDATION_SYSTEM),
+            HumanMessage(content=self.prompts.recommendations_user(state.query, company_data))
+        ]
+
+        response = self.llm.invoke(messages)
+        return { "analysis": response.content }
