@@ -3,10 +3,10 @@ from src.workflow import Workflow
 
 def main():
     workflow = Workflow()
-    print("Developer Tools Research Agent")
+    print("\nDeveloper Tools Research Agent")
 
     while True:
-        query = input("\nDeveloper Tools Query:").strip()
+        query = input("\nDeveloper Tools Query: ").strip()
 
         if query.lower() in {"quit", "exit"}:
             break

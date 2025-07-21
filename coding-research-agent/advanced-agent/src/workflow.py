@@ -12,7 +12,7 @@ class Workflow:
 
     def __init__(self):
         self.firecrawl = FireCrawlService()
-        self.llm = ChatOpenAI(model="gpt-4o-mini", tempature=0.1)
+        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
         self.prompts = DeveloperToolsPrompts()
         self.workflow = self._build_workflow()
 
@@ -35,10 +35,10 @@ class Workflow:
         print(f"Finding articles about: {state.query}")
 
         article_query = f"{state.query} tools comparision best alternatives"
-        search_results = self.firecrawl.search_compaines(article_query, num_results=3)  # get urls of company websites
+        search_results = self.firecrawl.search_companies(article_query, num_results=3)  # get urls of company websites
 
-        print("search results:")
-        print(search_results)
+        # print("search results:")
+        # print(search_results)
 
         all_content = ""
 
@@ -80,7 +80,7 @@ class Workflow:
 
             message = [
                 SystemMessage(content=self.prompts.TOOL_ANALYSIS_SYSTEM),
-                HumanMessage(content=self.prompts.tool_analysis_user(company_name, content))
+                HumanMessage(content=self.prompts.tool_analysis_user(name, content))
             ]
 
             try:
@@ -89,7 +89,7 @@ class Workflow:
             except Exception as e:
                 print(e)
                 return CompanyAnalysis(
-                    princing_model="Unknown",
+                    pricing_model="Unknown",
                     is_open_source=None,
                     tech_stack=[],
                     description="Failed",
@@ -108,7 +108,7 @@ class Workflow:
             search_results = self.firecrawl.search_companies(state.query, num_results=4)
 
             # Replace the tool names with the title of the websites metadata as a fallback
-            tools_names = []
+            tool_names = []
 
             for result in search_results.data:
                 result.get("metadata", {}).get("title", "Unknown")
@@ -124,7 +124,7 @@ class Workflow:
 
         for tool_name in tool_names:
             # Look up official site
-            tool_search_results = self.firecrawl.search_compaines(tool_name + " official site", num_results=1)
+            tool_search_results = self.firecrawl.search_companies(tool_name + " official site", num_results=1)
 
             if tool_search_results:
                 # Get website url
@@ -132,6 +132,7 @@ class Workflow:
                 url = result.get("url", "")
 
                 company = CompanyInfo(
+                    pricing_model="Unknown",
                     name=tool_name,
                     description=result.get("markdown", ""),
                     website=url,
@@ -146,12 +147,24 @@ class Workflow:
                     content = scraped.markdown
                     analysis = _analyze_company_content(company.name, content)
 
+                    company.pricing_model = analysis.pricing_model
+                    company.is_open_source = analysis.is_open_source
+                    company.tech_stack = analysis.tech_stack
+                    company.description = analysis.description
+                    company.api_available = analysis.api_available
+                    company.language_support = analysis.language_support
+                    company.integration_capabilities = analysis.integration_capabilities
+
+                companies.append(company)
+
+            return {"companies": companies}
+
 
     def _analyze_step(self, state: ResearchState) -> Dict[str, Any]:
         print("Generating recommendations")
 
         company_data = ",".join([
-            company.json() for company in state.compnaies
+            company.json() for company in state.companies
         ])
 
         messages = [
