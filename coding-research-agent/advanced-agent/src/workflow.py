@@ -19,7 +19,7 @@ class Workflow:
     def _build_workflow(self):
         pass
 
-    def _extract_tool_setup(self, state: ResearchState) -> Dict[str, Any]:
+    def _extract_tool_step(self, state: ResearchState) -> Dict[str, Any]:
         print(f"Finding articles about: {state.query}")
 
         article_query = f"{state.query} tools comparision best alternatives"
